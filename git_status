@@ -47,16 +47,16 @@ git_status() {
       # Renamed or copied entries have the following format:
       # 2 <XY> <sub> <mH> <mI> <mW> <hH> <hI> <X><score> <path><sep><origPath>
       1* | 2*) # 1: tracked, 2: renamed
-        line="${line#. }"
-        # xy="${line%% *}"
-        case "$(echo "$line" | cut -c1)" in
+        line="${line#* }"
+        xy="${line%% *}"
+        case "$(echo "$xy" | cut -c1)" in
           M) staged_modified=$((staged_modified + 1)) ;;
           A) staged_added=$((staged_added + 1)) ;;
           D) staged_deleted=$((staged_deleted + 1)) ;;
           R) staged_renamed=$((staged_renamed + 1)) ;;
           C) staged_copied=$((staged_copied + 1)) ;;
         esac
-        case "$(echo "$line" | cut -c2)" in
+        case "$(echo "$xy" | cut -c2)" in
           M) unstaged_modified=$((unstaged_modified + 1)) ;;
           A) unstaged_added=$((unstaged_added + 1)) ;;
           D) unstaged_deleted=$((unstaged_deleted + 1)) ;;
@@ -66,11 +66,11 @@ git_status() {
         ;;
       # Unmerged entries have the following format:
       # u <xy> <sub> <m1> <m2> <m3> <mW> <h1> <h2> <h3> <path>
-      "u"*) unmerged=$((unmerged + 1)) ;;
+      "u "*) unmerged=$((unmerged + 1)) ;;
       # Untracked items have the following format: ? <path>
-      "?"*) untracked=$((untracked + 1)) ;;
+      "? "*) untracked=$((untracked + 1)) ;;
       # Ignored items have the following format: ! <path>
-      "!"*) ignored=$((ignored + 1)) ;;
+      "! "*) ignored=$((ignored + 1)) ;;
       *) # echo >&2 "$line: invalid git status line"
         return 1
         ;;
@@ -97,7 +97,7 @@ git_status() {
   count=$((count + unstaged_modified + unstaged_added + unstaged_deleted + unstaged_renamed + unstaged_copied))
   count=$((count + unmerged + untracked)) # + ignored
   if [ "$count" -gt 0 ]; then
-    flags="$flags*"
+    flags="$flags*" # TODO var symbol
     branch_format="$dirty_format"
   elif [ "$ahead" -gt 0 ] || [ "$behind" -gt 0 ]; then
     branch_format="$stage_format"
