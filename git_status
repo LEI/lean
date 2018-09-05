@@ -68,15 +68,14 @@ flags=
 [ "$ahead" -gt 0 ] && flags="$flags>"
 if [ "$count" -gt 0 ]; then
   flags="$flags*"
-  # shellcheck disable=SC2059
-  branch="$(printf "$dirty_format" "$branch")"
+  branch_format="$dirty_format"
 elif [ "$ahead" -gt 0 ] || [ "$behind" -gt 0 ]; then
-  # shellcheck disable=SC2059
-  branch="$(printf "$other_format" "$branch")"
+  branch_format="$other_format"
 else
-  # shellcheck disable=SC2059
-  branch="$(printf "$clean_format" "$branch")"
+  branch_format="$clean_format"
 fi
+# shellcheck disable=SC2059
+branch="$(printf "$branch_format" "$branch")"
 
 printf "%s%s%s" "$prefix" "$branch" "$flags"
 
