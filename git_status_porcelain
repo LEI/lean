@@ -101,12 +101,56 @@ git_status_porcelain() {
   total=$((staged + unstaged + unmerged + untracked)) # + ignored
 
   if [ "$staged" -gt 0 ]; then
+    staged_str=
+    if [ "$staged_modified" -eq 0 ]; then
+      staged_str="~$staged_modified"
+    fi
+    if [ "$staged_added" -eq 0 ]; then
+      staged_str="+$staged_added"
+    fi
+    if [ "$staged_deleted" -eq 0 ]; then
+      staged_str="-$staged_deleted"
+    fi
+    if [ "$staged_deleted" -eq 0 ]; then
+      staged_str="-$staged_deleted"
+    fi
+    if [ "$staged_renamed" -eq 0 ]; then
+      staged_str="—$staged_renamed"
+    fi
+    if [ "$staged_copied" -eq 0 ]; then
+      staged_str="=$staged_copied"
+    fi
+    # ${unstaged}S
     # shellcheck disable=SC2059
-    flags="$flags $(printf "$stage_format" "${unstaged}S")"
+    flags="$flags $(printf "$stage_format" "$staged_str")"
   fi
   if [ "$unstaged" -gt 0 ]; then
+    unstaged_str=
+    if [ "$unstaged_modified" -eq 0 ]; then
+      unstaged_str="~$unstaged_modified"
+    fi
+    if [ "$unstaged_added" -eq 0 ]; then
+      unstaged_str="+$unstaged_added"
+    fi
+    if [ "$unstaged_deleted" -eq 0 ]; then
+      unstaged_str="-$unstaged_deleted"
+    fi
+    if [ "$unstaged_deleted" -eq 0 ]; then
+      unstaged_str="-$unstaged_deleted"
+    fi
+    if [ "$unstaged_renamed" -eq 0 ]; then
+      unstaged_str="•$unstaged_renamed"
+    fi
+    if [ "$unstaged_copied" -eq 0 ]; then
+      unstaged_str="=$unstaged_copied"
+    fi
+    # ${unstaged}U
     # shellcheck disable=SC2059
-    flags="$flags $(printf "$dirty_format" "${unstaged}U")"
+    flags="$flags $(printf "$dirty_format" "$unstaged_str")"
+  fi
+  if [ "$unmerged" -gt 0 ]; then
+    # shellcheck disable=SC2059
+    flags="$flags $(printf "$dirty_format" "${unmerged}u")"
   fi
   if [ "$untracked" -gt 0 ]; then
     # shellcheck disable=SC2059
