@@ -92,9 +92,8 @@ git_status_porcelain() {
     behind="${ab#+* }"
     behind="${behind#-}"
   fi
-  flags=
-  [ "$behind" -gt 0 ] && flags="$flags<"
-  [ "$ahead" -gt 0 ] && flags="$flags>"
+  [ "$behind" -gt 0 ] && flags="<"
+  [ "$ahead" -gt 0 ] && flags=">"
 
   staged=$((staged_modified + staged_added + staged_deleted + staged_renamed + staged_copied))
   unstaged=$((unstaged_modified + unstaged_added + unstaged_deleted + unstaged_renamed + unstaged_copied))
@@ -121,8 +120,9 @@ git_status_porcelain() {
       staged_str="=$staged_copied"
     fi
     # ${unstaged}S
+    [ -n "$flags" ] && flags="$flags "
     # shellcheck disable=SC2059
-    flags="$flags $(printf "$stage_format" "$staged_str")"
+    flags="$flags$(printf "$stage_format" "$staged_str")"
   fi
   if [ "$unstaged" -gt 0 ]; then
     unstaged_str=
@@ -145,19 +145,23 @@ git_status_porcelain() {
       unstaged_str="=$unstaged_copied"
     fi
     # ${unstaged}U
+    [ -n "$flags" ] && flags="$flags "
     # shellcheck disable=SC2059
-    flags="$flags $(printf "$dirty_format" "$unstaged_str")"
+    flags="$flags$(printf "$dirty_format" "$unstaged_str")"
   fi
   if [ "$unmerged" -gt 0 ]; then
+    [ -n "$flags" ] && flags="$flags "
     # shellcheck disable=SC2059
-    flags="$flags $(printf "$dirty_format" "${unmerged}u")"
+    flags="$flags$(printf "$dirty_format" "${unmerged}u")"
   fi
   if [ "$untracked" -gt 0 ]; then
+    [ -n "$flags" ] && flags="$flags "
     # shellcheck disable=SC2059
-    flags="$flags $(printf "$dirty_format" "${untracked}?")"
+    flags="$flags$(printf "$dirty_format" "${untracked}?")"
   fi
   if [ "$ignored" -gt 0 ]; then
-    flags="$flags ${ignored}!"
+    [ -n "$flags" ] && flags="$flags "
+    flags="$flags${ignored}!"
   fi
 
   if [ "$total" -gt 0 ]; then
