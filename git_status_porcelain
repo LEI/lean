@@ -96,18 +96,27 @@ git_status_porcelain() {
   [ "$behind" -gt 0 ] && flags="$flags<"
   [ "$ahead" -gt 0 ] && flags="$flags>"
 
-  count=$((count + staged_modified + staged_added + staged_deleted + staged_renamed + staged_copied))
-  count=$((count + unstaged_modified + unstaged_added + unstaged_deleted + unstaged_renamed + unstaged_copied))
-  count=$((count + unmerged + untracked)) # + ignored
+  staged=$((staged_modified + staged_added + staged_deleted + staged_renamed + staged_copied))
+  unstaged=$((unstaged_modified + unstaged_added + unstaged_deleted + unstaged_renamed + unstaged_copied))
+  total=$((staged + unstaged + unmerged + untracked)) # + ignored
 
+  if [ "$staged" -gt 0 ]; then
+    # shellcheck disable=SC2059
+    flags="$flags $(printf "$stage_format" "${unstaged}S")"
+  fi
+  if [ "$unstaged" -gt 0 ]; then
+    # shellcheck disable=SC2059
+    flags="$flags $(printf "$dirty_format" "${unstaged}U")"
+  fi
   if [ "$untracked" -gt 0 ]; then
-    flags="$flags?$untracked"
+    # shellcheck disable=SC2059
+    flags="$flags $(printf "$dirty_format" "${untracked}?")"
   fi
   if [ "$ignored" -gt 0 ]; then
-    flags="$flags?$ignored"
+    flags="$flags ${ignored}!"
   fi
 
-  if [ "$count" -gt 0 ]; then
+  if [ "$total" -gt 0 ]; then
     # flags="$flags*"
     branch_format="$dirty_format"
   elif [ "$ahead" -gt 0 ] || [ "$behind" -gt 0 ]; then
@@ -120,9 +129,9 @@ git_status_porcelain() {
 
   printf "%s%s" "$branch" "$flags"
 
-  ret=0
-  [ "$count" -gt 0 ] && ret="${GIT_STATUS_staged_RET:-2}"
-  return "$ret"
+  if [ "$total" -gt 0 ]; then
+    return 2
+  fi
 }
 
 # git_status_porcelain "$@"
