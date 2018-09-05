@@ -4,11 +4,11 @@
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   return $?
 fi
-prefix="${1:-on }"      # format="${1:-on %s%s}"
-# branch_format, flags_format?
-dirty_format="${2:-%s}" # Dirty repository
-other_format="${3:-%s}" # unstaged, unmerged...?
-clean_format="${4:-%s}" # Clean repository
+# format/prefix="${1:-on %s%s}"
+branch_format="%s"      # flags_format?
+dirty_format="${1:-%s}" # dirty repository format
+other_format="${2:-%s}" # unstaged, unmerged...?
+clean_format="${3:-%s}" # clean repository format
 tmpdir=$(mktemp -d -t git.status)
 tmpfile="$tmpdir/porcelain.fifo"
 mkfifo "$tmpfile" # TODO mktmp to avoid collision?
@@ -44,15 +44,10 @@ while read -r line; do
   esac
 done <"$tmpfile"
 rm "$tmpfile" && rmdir "$tmpdir" # rm -R "$tmpdir"
-# echo "oid: $oid"
-# echo "head: $head"
-# echo "upstream: $upstream"
-# echo "ab: $ab"
 branch="${head:-$(echo "$oid" | cut -c-7)}"
 if [ "${GIT_STATUS_UPSTREAM:-0}" -eq 1 ] && [ -n "$upstream" ]; then
   branch="$branch...$upstream"
 fi
-
 # branch.ab +<ahead> -<behind>
 ahead=0
 behind=0
@@ -62,7 +57,6 @@ if [ -n "$ab" ]; then
   behind="${ab#+* }"
   behind="${behind#-}"
 fi
-
 flags=
 [ "$behind" -gt 0 ] && flags="$flags<"
 [ "$ahead" -gt 0 ] && flags="$flags>"
@@ -77,7 +71,7 @@ fi
 # shellcheck disable=SC2059
 branch="$(printf "$branch_format" "$branch")"
 
-printf "%s%s%s" "$prefix" "$branch" "$flags"
+printf "%s%s" "$branch" "$flags"
 
 ret=0
 [ "$count" -gt 0 ] && ret="${GIT_STATUS_OTHER_RET:-2}"
