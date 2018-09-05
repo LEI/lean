@@ -63,21 +63,21 @@ prompt_lean_human_time() {
     echo "${seconds}s "
 }
 
-# fastest possible way to check if repo is dirty
-prompt_lean_git_dirty() {
-    # check if we're in a git repo
-    command git rev-parse --is-inside-work-tree &>/dev/null || return
+# # fastest possible way to check if repo is dirty
+# prompt_lean_git_dirty() {
+#     # check if we're in a git repo
+#     command git rev-parse --is-inside-work-tree &>/dev/null || return
 
-    # check if it's dirty
-    local umode="-uno" #|| local umode="-unormal"
-    command test -n "$(git status --porcelain --ignore-submodules ${umode} 2>/dev/null | head -100)"
+#     # check if it's dirty
+#     local umode="-uno" #|| local umode="-unormal"
+#     command test -n "$(git status --porcelain --ignore-submodules ${umode} 2>/dev/null | head -100)"
 
-    (($? == 0)) && echo ' +'
-}
+#     (($? == 0)) && echo ' +'
+# }
 
 prompt_lean_git_status() {
     # prefix, dirty format, nsync format, clean format
-    git_status ' %%F{1}%s%%f' ' %%F{3}%s%%f' ' %%F{2}%s%%f'
+    prompt_lean_git="$(git_status ' %%F{1}%s%%f' ' %%F{3}%s%%f' ' %%F{2}%s%%f')"
 }
 
 # displays the exec time of the last command if set threshold was exceeded
@@ -113,7 +113,7 @@ prompt_lean_pwd() {
 }
 
 prompt_lean_precmd() {
-    # vcs_info
+    prompt_lean_git_status # vcs_info
     rehash
 
     local jobs
@@ -135,7 +135,7 @@ prompt_lean_precmd() {
 
     setopt promptsubst
     # local vcs_info_str='$vcs_info_msg_0_' # avoid https://github.com/njhartwell/pw3nage
-    local git_status_str="$(prompt_lean_git_status)"
+    local git_status_str='$prompt_lean_git'
     PROMPT="${prompt_lean_host}${prompt_lean_jobs}%F{"$COLOR3"}${prompt_lean_tmux}%f`$PROMPT_LEAN_LEFT`%f%(?.%F{"$COLOR2"}.%F{1})"$PROMPT_SYMBOL"%f%k "
     RPROMPT="%F{"$COLOR3"}`prompt_lean_cmd_exec_time`%f$prompt_lean_vimode%F{"$COLOR2"}`prompt_lean_pwd`%F{"$COLOR1"}$git_status_str%f`$PROMPT_LEAN_RIGHT`%f"
 
