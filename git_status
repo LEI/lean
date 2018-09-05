@@ -1,7 +1,5 @@
 #!/bin/sh
 
-GIT_STATUS_OTHER_RET="2"
-
 # --git-dir --is-inside-git-dir --is-bare-repository
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   return $?
@@ -66,8 +64,8 @@ if [ -n "$ab" ]; then
 fi
 
 flags=
-[ "$behind" -gt 0 ] && flags="$flags>"
-[ "$ahead" -gt 0 ] && flags="$flags<"
+[ "$behind" -gt 0 ] && flags="$flags<"
+[ "$ahead" -gt 0 ] && flags="$flags>"
 if [ "$count" -gt 0 ]; then
   flags="$flags*"
   # shellcheck disable=SC2059
@@ -76,11 +74,12 @@ elif [ "$ahead" -gt 0 ] || [ "$behind" -gt 0 ]; then
   # shellcheck disable=SC2059
   branch="$(printf "$other_format" "$branch")"
 else
-  prefix="$clean_format$prefix"
+  # shellcheck disable=SC2059
+  branch="$(printf "$clean_format" "$branch")"
 fi
 
 printf "%s%s%s" "$prefix" "$branch" "$flags"
 
 ret=0
-[ "$count" -gt 0 ] && ret="${GIT_STATUS_OTHER_RET}"
-return $ret
+[ "$count" -gt 0 ] && ret="${GIT_STATUS_OTHER_RET:-2}"
+return "$ret"
