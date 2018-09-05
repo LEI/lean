@@ -7,7 +7,7 @@ fi
 # format/prefix="${1:-on %s%s}"
 branch_format="%s"      # flags_format?
 dirty_format="${1:-%s}" # dirty repository format
-other_format="${2:-%s}" # unstaged, unmerged...?
+stage_format="${2:-%s}" # staged, unstaged, unmerged...?
 clean_format="${3:-%s}" # clean repository format
 tmpdir=$(mktemp -d -t git.status)
 tmpfile="$tmpdir/porcelain.fifo"
@@ -64,7 +64,7 @@ if [ "$count" -gt 0 ]; then
   flags="$flags*"
   branch_format="$dirty_format"
 elif [ "$ahead" -gt 0 ] || [ "$behind" -gt 0 ]; then
-  branch_format="$other_format"
+  branch_format="$stage_format"
 else
   branch_format="$clean_format"
 fi
@@ -74,5 +74,5 @@ branch="$(printf "$branch_format" "$branch")"
 printf "%s%s" "$branch" "$flags"
 
 ret=0
-[ "$count" -gt 0 ] && ret="${GIT_STATUS_OTHER_RET:-2}"
+[ "$count" -gt 0 ] && ret="${GIT_STATUS_staged_RET:-2}"
 return "$ret"
