@@ -1,15 +1,15 @@
 #!/bin/sh
 
-git_status() {
+git_status_porcelain() {
   # --git-dir --is-inside-git-dir --is-bare-repository
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     return $?
   fi
-  # format/prefix="${1:-on %s%s}"
-  branch_format="%s"      # flags_format?
+  # branch format/prefix="${1:-on %s%s}"
   dirty_format="${1:-%s}" # dirty repository format
   stage_format="${2:-%s}" # staged, unstaged, unmerged...?
   clean_format="${3:-%s}" # clean repository format
+
   tmpdir=$(mktemp -d -t git.status)
   tmpfile="$tmpdir/porcelain.fifo"
   mkfifo "$tmpfile" # TODO mktmp to avoid collision?
@@ -77,10 +77,12 @@ git_status() {
     esac
   done <"$tmpfile"
   rm "$tmpfile" && rmdir "$tmpdir" # rm -R "$tmpdir"
+
   branch="${head:-$(echo "$oid" | cut -c-7)}"
   if [ "${GIT_STATUS_UPSTREAM:-0}" -eq 1 ] && [ -n "$upstream" ]; then
     branch="$branch...$upstream"
   fi
+
   # branch.ab +<ahead> -<behind>
   ahead=0
   behind=0
@@ -93,11 +95,20 @@ git_status() {
   flags=
   [ "$behind" -gt 0 ] && flags="$flags<"
   [ "$ahead" -gt 0 ] && flags="$flags>"
+
   count=$((count + staged_modified + staged_added + staged_deleted + staged_renamed + staged_copied))
   count=$((count + unstaged_modified + unstaged_added + unstaged_deleted + unstaged_renamed + unstaged_copied))
   count=$((count + unmerged + untracked)) # + ignored
+
+  if [ "$untracked" -gt 0 ]; then
+    flags="$flags?$untracked"
+  fi
+  if [ "$ignored" -gt 0 ]; then
+    flags="$flags?$ignored"
+  fi
+
   if [ "$count" -gt 0 ]; then
-    flags="$flags*" # TODO var symbol
+    # flags="$flags*"
     branch_format="$dirty_format"
   elif [ "$ahead" -gt 0 ] || [ "$behind" -gt 0 ]; then
     branch_format="$stage_format"
@@ -113,3 +124,5 @@ git_status() {
   [ "$count" -gt 0 ] && ret="${GIT_STATUS_staged_RET:-2}"
   return "$ret"
 }
+
+# git_status_porcelain "$@"
