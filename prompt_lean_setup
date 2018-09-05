@@ -77,7 +77,7 @@ prompt_lean_human_time() {
 
 prompt_lean_git_status() {
     # prefix, dirty format, nsync format, clean format
-    prompt_lean_git="$(git_status ' %%F{1}%s%%f' ' %%F{3}%s%%f' ' %%F{2}%s%%f')"
+    prompt_lean_git="$(git_status ' %%F{red}%s%%f' ' %%F{yellow}%s%%f' ' %%F{green}%s%%f')"
 }
 
 # displays the exec time of the last command if set threshold was exceeded
@@ -136,7 +136,7 @@ prompt_lean_precmd() {
     setopt promptsubst
     # local vcs_info_str='$vcs_info_msg_0_' # avoid https://github.com/njhartwell/pw3nage
     local git_status_str='$prompt_lean_git'
-    PROMPT="${prompt_lean_host}${prompt_lean_jobs}%F{"$COLOR3"}${prompt_lean_tmux}%f`$PROMPT_LEAN_LEFT`%f%(?.%F{"$COLOR2"}.%F{1})"$PROMPT_SYMBOL"%f%k "
+    PROMPT="${prompt_lean_host}${prompt_lean_jobs}%F{"$COLOR3"}${prompt_lean_tmux}%f`$PROMPT_LEAN_LEFT`%f%(?.%F{"$COLOR2"}.%F{red})"$PROMPT_SYMBOL"%f%k "
     RPROMPT="%F{"$COLOR3"}`prompt_lean_cmd_exec_time`%f$prompt_lean_vimode%F{"$COLOR2"}`prompt_lean_pwd`%F{"$COLOR1"}$git_status_str%f`$PROMPT_LEAN_RIGHT`%f"
 
     unset cmd_timestamp # reset value since `preexec` isn't always triggered
@@ -165,8 +165,8 @@ prompt_lean_setup() {
     # zstyle ':vcs_info:git*' actionformats ' %b|%a'
 
     # zstyle ':vcs_info:*' check-for-changes true
-    # zstyle ':vcs_info:*' stagedstr '%F{2}'
-    # zstyle ':vcs_info:*' unstagedstr '%F{1}'
+    # zstyle ':vcs_info:*' stagedstr '%F{green}'
+    # zstyle ':vcs_info:*' unstagedstr '%F{red}'
 
     [[ "$SSH_CONNECTION" != '' ]] && prompt_lean_host=" %F{"$COLOR3"}%m%f"
     [[ "$TMUX" != '' ]] && prompt_lean_tmux=$PROMPT_LEAN_TMUX
