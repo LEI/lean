@@ -140,6 +140,7 @@ prompt_lean_precmd() {
     # local vcs_info_str='$vcs_info_msg_0_' # avoid https://github.com/njhartwell/pw3nage
     local git_status_str='$prompt_lean_git'
     PROMPT="${prompt_lean_host}${prompt_lean_jobs}%F{"$COLOR3"}${prompt_lean_tmux}%f`$PROMPT_LEAN_LEFT`%f%(?.%F{"$COLOR2"}.%F{red})"$PROMPT_SYMBOL"%f%k "
+    PROMPT2="${PROMPT_SYMBOL:-%_>} "
     RPROMPT="%F{"$COLOR3"}`prompt_lean_cmd_exec_time`%f$prompt_lean_vimode%F{"$COLOR2"}`prompt_lean_pwd`%F{"$COLOR1"}$git_status_str%f`$PROMPT_LEAN_RIGHT`%f"
 
     unset cmd_timestamp # reset value since `preexec` isn't always triggered
